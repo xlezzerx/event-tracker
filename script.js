@@ -1,5 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-analytics.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
 // Get references to DOM elements
 const eventForm = document.getElementById("event-form");
 const eventTitle = document.getElementById("event-title");
@@ -21,9 +27,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+const db = getFirestore(app); // Firestore instance
 
 // Event handler for form submission
-eventForm.addEventListener("submit", function (e) {
+eventForm.addEventListener("submit", async function (e) {
   e.preventDefault(); // Prevent the default form submission
 
   const title = eventTitle.value;
@@ -31,14 +38,27 @@ eventForm.addEventListener("submit", function (e) {
   const time = eventTime.value;
 
   if (title && date && time) {
-    // Create new event element
-    const eventItem = document.createElement("li");
-    eventItem.textContent = `${title} - ${date} ${time}`;
+    // Add event to Firestore
+    try {
+      const docRef = await addDoc(collection(db, "events"), {
+        title,
+        date,
+        time,
+      });
 
-    // Append event to the list
-    eventsList.appendChild(eventItem);
+      console.log("Event added with ID: ", docRef.id);
 
-    // Clear the form
-    eventForm.reset();
+      // Create new event element
+      const eventItem = document.createElement("li");
+      eventItem.textContent = `${title} - ${date} ${time}`;
+
+      // Append event to the list
+      eventsList.appendChild(eventItem);
+
+      // Clear the form
+      eventForm.reset();
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   }
 });
