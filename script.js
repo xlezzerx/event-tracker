@@ -32,6 +32,9 @@ const eventDate = document.getElementById("event-date");
 const eventTime = document.getElementById("event-time");
 const eventsList = document.getElementById("events");
 const eventReminder = document.getElementById("event-reminder");
+const toggleCalendarBtn = document.getElementById("toggle-calendar");
+const calendarContainer = document.getElementById("calendar");
+const eventListContainer = document.getElementById("events");
 
 // Modal Elements
 const editModal = document.getElementById("edit-modal");
@@ -43,6 +46,26 @@ const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
 // Store the current editing event id globally
 let currentEditingEventId = null;
+let calendar;
+
+toggleCalendarBtn.addEventListener("click", () => {
+  const isCalendarVisible = calendarContainer.style.display === "block";
+
+  if (isCalendarVisible) {
+    // Hide calendar, show event list
+    calendarContainer.style.display = "none";
+    eventListContainer.style.display = "block";
+    toggleCalendarBtn.textContent = "View Calendar";
+  } else {
+    // Show calendar, hide event list
+    calendarContainer.style.display = "block";
+    eventListContainer.style.display = "none";
+    toggleCalendarBtn.textContent = "View List";
+
+    // Render calendar when it's visible
+    renderCalendarView();
+  }
+});
 
 // Function to format the date
 function formatDate(dateString) {
@@ -118,8 +141,71 @@ async function renderEvents() {
   }
 }
 
+// Function to render events in Calendar View
+async function renderCalendarView() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "events"));
+    const events = [];
+
+    querySnapshot.forEach((eventDoc) => {
+      const eventData = eventDoc.data();
+      const startDateTime = new Date(`${eventData.date}T${eventData.time}`);
+      events.push({
+        id: eventDoc.id,
+        title: eventData.title,
+        start: startDateTime,
+      });
+    });
+
+    console.log(events);
+
+    const calendarEl = document.getElementById("calendar");
+    if (!calendarEl) {
+      console.error("Calendar element not found");
+      return;
+    }
+
+    // Only render the calendar if it's visible
+    if (calendarContainer.style.display === "block") {
+      // Destroy the old calendar if it exists
+      if (calendar) {
+        calendar.destroy();
+      }
+
+      // Initialize the new calendar instance
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        events: events,
+        headerToolbar: {
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay",
+        },
+        editable: true,
+        droppable: true,
+        eventClick: function (info) {
+          // Open the modal and populate with event details
+          modalTitle.value = info.event.title;
+          modalDate.value = info.event.start.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
+          modalTime.value = info.event.start
+            .toISOString()
+            .split("T")[1]
+            .split(".")[0]; // Format time as HH:mm
+
+          currentEditingEventId = info.event.id;
+          editModal.style.display = "block";
+        },
+      });
+
+      calendar.render();
+    }
+  } catch (e) {
+    console.error("Error fetching events for calendar: ", e);
+  }
+}
+
 // Call renderEvents to load events on page load
 renderEvents();
+renderCalendarView();
 
 // Event handler for form submission
 eventForm.addEventListener("submit", async function (e) {
@@ -151,6 +237,7 @@ eventForm.addEventListener("submit", async function (e) {
 
       eventForm.reset();
       renderEvents();
+      renderCalendarView();
     } catch (e) {
       console.error("Error adding event to Firestore: ", e);
     }
@@ -177,6 +264,7 @@ saveEditBtn.addEventListener("click", async () => {
 
       // Re-render the events to reflect the changes
       renderEvents();
+      renderCalendarView();
     } catch (e) {
       console.error("Error updating event: ", e);
     }

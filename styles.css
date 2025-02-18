@@ -4,7 +4,7 @@
     padding: 0;
     box-sizing: border-box;
   }
-  
+
   header {
     background-color: #530d56;
     color: white;
@@ -76,7 +76,6 @@
     min-height: 200px;
 }
 
-/* Ensuring all event items are the same size */
 .event-item {
   background-color: #ffffff;
   margin-bottom: 15px;
@@ -84,7 +83,6 @@
   align-items: stretch;
 }
 
-/* Make the header stretch across the top */
 .event-header {
   background-color: #549fe5;
   font-size: 1.6em;
@@ -100,7 +98,6 @@
   padding: 10px;
 }
 
-/* Event date/time with box shadow */
 .event-date-time {
     font-size: 1.4em;
     color: #555;

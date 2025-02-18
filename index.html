@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Scheduler</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 </head>
 
 <body>
@@ -18,6 +20,8 @@
         <ul id="events">
             <!-- Event items will go here -->
         </ul>
+        <button id="toggle-calendar">View Calendar</button>
+        <div id="calendar" style="display:none;"></div>
     </section>
 
     <section id="add-event">
@@ -33,7 +37,7 @@
             <input type="time" id="event-time" required>
 
             <label for="event-reminder">Reminder (minutes before):</label>
-            <input type="number" id="event-reminder" min="1" required>
+            <input type="number" id="event-reminder" min="1">
 
             <button type="submit">Add Event</button>
         </form>
