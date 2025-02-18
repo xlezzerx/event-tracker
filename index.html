@@ -36,6 +36,22 @@
         </form>
     </section>
 
+    <!-- Modal for Editing Event -->
+    <div id="edit-modal" style="display:none;">
+        <h3>Edit Event</h3>
+        <label for="modal-title">Title:</label>
+        <input type="text" id="modal-title" required>
+
+        <label for="modal-date">Date:</label>
+        <input type="date" id="modal-date" required>
+
+        <label for="modal-time">Time:</label>
+        <input type="time" id="modal-time" required>
+
+        <button id="save-edit-btn">Save</button>
+        <button id="cancel-edit-btn">Cancel</button>
+    </div>
+
     <script type="module" src="script.js"></script>
 
 </body>
