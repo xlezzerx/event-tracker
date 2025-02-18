@@ -31,6 +31,7 @@ const eventTitle = document.getElementById("event-title");
 const eventDate = document.getElementById("event-date");
 const eventTime = document.getElementById("event-time");
 const eventsList = document.getElementById("events");
+const eventReminder = document.getElementById("event-reminder");
 
 // Modal Elements
 const editModal = document.getElementById("edit-modal");
@@ -127,6 +128,7 @@ eventForm.addEventListener("submit", async function (e) {
   const title = eventTitle.value;
   const date = eventDate.value;
   const time = eventTime.value;
+  const reminder = parseInt(eventReminder.value) || 0;
 
   if (title && date && time) {
     try {
@@ -134,14 +136,18 @@ eventForm.addEventListener("submit", async function (e) {
         title,
         date,
         time,
+        reminder,
       });
 
-      // const eventItem = document.createElement("li");
-      // eventItem.textContent = `${title} - ${date} ${time}`;
+      // Set reminder alert
+      if (reminder > 0) {
+        const eventTimeDate = new Date(`${date}T${time}:00`);
+        const reminderTime = eventTimeDate.getTime() - reminder * 60 * 1000; // Convert to milliseconds
 
-      // eventItem.appendChild(deleteBtn);
-      // eventItem.appendChild(editBtn);
-      // eventsList.appendChild(eventItem);
+        setTimeout(() => {
+          alert(`Reminder: ${title} is starting soon!`);
+        }, reminderTime - Date.now()); // Schedule reminder
+      }
 
       eventForm.reset();
       renderEvents();
