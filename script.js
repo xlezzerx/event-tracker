@@ -56,6 +56,13 @@ toggleCalendarBtn.addEventListener("click", () => {
     calendarContainer.style.display = "none";
     eventListContainer.style.display = "block";
     toggleCalendarBtn.textContent = "View Calendar";
+
+    // Reapply styles for the list view
+    const eventsContainer = document.getElementById("events");
+    eventsContainer.style.display = "grid";
+    eventsContainer.style.gridTemplateColumns =
+      "repeat(auto-fill, minmax(250px, 1fr))";
+    eventsContainer.style.gap = "15px";
   } else {
     // Show calendar, hide event list
     calendarContainer.style.display = "block";
@@ -102,6 +109,10 @@ async function renderEvents() {
 
       eventDetails.appendChild(eventTitleTime);
 
+      // Create a container div for the buttons
+      const buttonContainer = document.createElement("div");
+      buttonContainer.classList.add("button-container");
+
       // Create delete button for each event
       const deleteBtn = document.createElement("button");
       deleteBtn.classList.add("delete-btn");
@@ -129,11 +140,14 @@ async function renderEvents() {
         editModal.style.display = "block";
       });
 
+      // Append buttons to the container
+      buttonContainer.appendChild(editBtn);
+      buttonContainer.appendChild(deleteBtn);
+
       // Append everything to the event item
       eventItem.appendChild(eventHeader);
       eventItem.appendChild(eventDetails);
-      eventItem.appendChild(deleteBtn);
-      eventItem.appendChild(editBtn);
+      eventItem.appendChild(buttonContainer);
       eventsList.appendChild(eventItem);
     });
   } catch (e) {
@@ -185,11 +199,11 @@ async function renderCalendarView() {
         eventClick: function (info) {
           // Open the modal and populate with event details
           modalTitle.value = info.event.title;
-          modalDate.value = info.event.start.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
-          modalTime.value = info.event.start
-            .toISOString()
-            .split("T")[1]
-            .split(".")[0]; // Format time as HH:mm
+          modalDate.value = info.event.start.toLocaleDateString("en-CA"); // 'YYYY-MM-DD'
+          modalTime.value = info.event.start.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
 
           currentEditingEventId = info.event.id;
           editModal.style.display = "block";
