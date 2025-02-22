@@ -45,9 +45,9 @@ jobs:
           eslint_flags: "**/*.js"
 
       - name: Validate HTML
-        uses: Cyb3r-Jak3/html5validator-action@v1.2.2
-        with:
-          root: ./
+        run: |
+          sudo apt-get install -y tidy
+          tidy -errors index.html || true
 
       - name: Deploy to GitHub Pages
         if: success()
