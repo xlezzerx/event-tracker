@@ -1,22 +1,57 @@
-name: Deploy to GitHub Pages
+# name: Deploy to GitHub Pages
+
+# on:
+#   push:
+#     branches:
+#       - main  # Trigger the deployment when code is pushed to the main branch
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest  # Use the latest Ubuntu environment for the job
+
+#     steps:
+#     # Step 1: Checkout the code
+#     - name: Checkout code
+#       uses: actions/checkout@v2
+
+#     # Step 2: Deploy to GitHub Pages
+#     - name: Deploy to GitHub Pages
+#       uses: peaceiris/actions-gh-pages@v3
+#       with:
+#         github_token: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided token for authentication
+#         publish_dir: ./  # Directory to publish (the root of your repo)
+
+name: Lint, Test, and Deploy
 
 on:
   push:
     branches:
-      - main  # Trigger the deployment when code is pushed to the main branch
+      - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu environment for the job
+  lint-test-deploy:
+    runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    # Step 2: Deploy to GitHub Pages
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided token for authentication
-        publish_dir: ./  # Directory to publish (the root of your repo)
+      # Run ESLint (Without npm)
+      - name: Run ESLint
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-check
+          eslint_flags: "**/*.js"
+
+      - name: Validate HTML
+        uses: Cyb3r-Jak3/html5validator-action@v1.2.2
+        with:
+          root: ./
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
