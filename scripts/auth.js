@@ -26,6 +26,7 @@ const auth = getAuth(app);
 console.log("Firebase initialized:", app);
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOMContentLoaded triggered");
   const loginForm = document.getElementById("login-form");
   const biometricBtn = document.getElementById("biometric-login");
   const registerBtn = document.getElementById("register");
