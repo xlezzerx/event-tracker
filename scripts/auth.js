@@ -176,27 +176,25 @@ document.addEventListener("DOMContentLoaded", () => {
   ) {
     console.log("Inside index.html logic");
 
+    const loginForm = document.getElementById("login-form");
+
+
     if (loginForm) {
-      console.log("Login form found");
       loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        console.log("Login form submitted");
-
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
         signInWithEmailAndPassword(auth, email, password)
-          .then(() => {
-            console.log("Login successful, redirecting to events.html");
-            window.location.href = "events.html";
+          .then((userCredential) => {
+            console.log("✅ User logged in:", userCredential.user);
+            window.location.href = "events.html"; // Redirect to events page
           })
           .catch((error) => {
-            console.error("Login failed:", error);
+            console.error("❌ Login failed:", error);
             alert(error.message);
           });
       });
-    } else {
-      console.log("Login form not found");
     }
 
     if (registerBtn) {
@@ -279,10 +277,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Handle user authentication state
   onAuthStateChanged(auth, (user) => {
-    console.log("Auth state changed:", user);
-    if (!user && window.location.pathname.includes("events.html")) {
-      console.log("User not logged in, redirecting to index.html");
-      window.location.href = "index.html";
+    console.log("🔄 Auth state changed:", user);
+    if (user) {
+      console.log("✅ User is logged in:", user.email);
+    } else {
+      console.log("🚫 No user is logged in.");
     }
   });
 
