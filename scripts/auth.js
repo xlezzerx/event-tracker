@@ -36,10 +36,13 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.pathname.endsWith("index.html") ||
     window.location.pathname === "/"
   ) {
-    const loginButton = document.querySelector(".login-button");
-    loginButton.addEventListener("click", (e) => {
-      console.log("Login button clicked"); // Check if the button is being clicked
-    });
+    if (loginButton) {
+      loginButton.addEventListener("click", (e) => {
+        console.log("Login button clicked"); // Check if the button is being clicked
+      });
+    } else {
+      console.log("Login button not found");
+    }
 
     if (loginForm) {
       loginForm.addEventListener("submit", (e) => {
