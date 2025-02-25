@@ -158,7 +158,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 auth.useDeviceLanguage();
-auth.setPersistence(browserSessionPersistence);
+// auth.setPersistence(browserSessionPersistence);
 
 console.log("Firebase initialized:", app);
 console.log("Auth initialized:", auth);
@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Handle logout functionality, only on events.html
-  if (window.location.pathname === "/events.html") {
+  if (window.location.pathname === "/events.html" || window.location.pathname.endsWith("/event-tracker/")) {
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
