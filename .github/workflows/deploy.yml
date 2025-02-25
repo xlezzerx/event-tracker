@@ -1,3 +1,41 @@
+# name: Lint, Test, and Deploy
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   lint-test-deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       # Install ESLint manually (without npm)
+#       - name: Install ESLint Manually
+#         run: |
+#           curl -L https://raw.githubusercontent.com/eslint/eslint/main/bin/eslint.js -o eslint.js
+#           chmod +x eslint.js
+
+#       # Run ESLint on all JavaScript files
+#       - name: Run ESLint
+#         run: |
+#           node eslint.js "**/*.js" --no-eslintrc --env browser || true
+
+#       - name: Validate HTML
+#         run: |
+#           sudo apt-get install -y tidy
+#           tidy -errors index.html || true
+
+#       - name: Deploy to GitHub Pages
+#         if: success()
+#         uses: peaceiris/actions-gh-pages@v3
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_dir: ./
+
 name: Lint, Test, and Deploy
 
 on:
@@ -29,9 +67,20 @@ jobs:
           sudo apt-get install -y tidy
           tidy -errors index.html || true
 
+      # Ensure a fresh deploy by clearing the old cache
+      - name: Clear Cache
+        run: |
+          git clean -fdx
+
+      - name: Build project
+        run: |
+          # If you have any build steps (e.g., minifying JS), add them here
+          echo "Build complete."
+
       - name: Deploy to GitHub Pages
         if: success()
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          publish_dir: ./  # Make sure this includes all the required files and folders
+          keep_files: false  # Optionally, clear the old files before pushing new ones
