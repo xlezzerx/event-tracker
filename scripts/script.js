@@ -3,11 +3,14 @@ import {
   getFirestore,
   collection,
   getDocs,
-  addDoc,
+  where,
   deleteDoc,
   doc,
+  addDoc,
+  query,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -23,6 +26,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Get references to DOM elements
 const eventForm = document.getElementById("event-form");
@@ -43,62 +47,87 @@ const modalTime = document.getElementById("modal-time");
 const saveEditBtn = document.getElementById("save-edit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
-// Store the current editing event id globally
 let currentEditingEventId = null;
 let calendar;
 
-toggleCalendarBtn.addEventListener("click", () => {
-  const isCalendarVisible = calendarContainer.style.display === "block";
-
-  if (isCalendarVisible) {
-    // Hide calendar, show event list
-    calendarContainer.style.display = "none";
-    eventListContainer.style.display = "block";
-    toggleCalendarBtn.textContent = "View Calendar";
-
-    // Reapply styles for the list view
-    const eventsContainer = document.getElementById("events");
-    eventsContainer.style.display = "grid";
-    eventsContainer.style.gridTemplateColumns =
-      "repeat(auto-fill, minmax(250px, 1fr))";
-    eventsContainer.style.gap = "15px";
+// Listen for authentication state changes
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // User is signed in, you can now render events
+    console.log("User logged in:", user.uid);
+    renderEvents(user);
+    renderCalendarView(user);
   } else {
-    // Show calendar, hide event list
-    calendarContainer.style.display = "block";
-    eventListContainer.style.display = "none";
-    toggleCalendarBtn.textContent = "View List";
+    // User is not signed in, redirect to login
+    console.log("No user logged in.");
+    window.location.href = "index.html";
+  }
+});
 
-    // Re-render calendar to ensure it loads correctly when it's visible
-    renderCalendarView();
+// Event handler for form submission
+eventForm.addEventListener("submit", async function (e) {
+  e.preventDefault(); // Prevent the default form submission
+
+  const title = eventTitle.value;
+  const date = eventDate.value;
+  const time = eventTime.value;
+  const reminder = parseInt(eventReminder.value) || 0;
+
+  if (title && date && time) {
+    try {
+      const docRef = await addDoc(collection(db, "events"), {
+        title,
+        date,
+        time,
+        reminder,
+        userId: auth.currentUser.uid,
+      });
+
+      // Set reminder alert
+      if (reminder > 0) {
+        const eventTimeDate = new Date(`${date}T${time}:00`);
+        const reminderTime = eventTimeDate.getTime() - reminder * 60 * 1000;
+
+        setTimeout(() => {
+          alert(`Reminder: ${title} is starting soon!`);
+        }, reminderTime - Date.now());
+      }
+
+      eventForm.reset();
+      renderEvents(auth.currentUser); // Re-render events with the current user
+      closeModal();
+    } catch (e) {
+      console.error("Error adding event: ", e);
+    }
   }
 });
 
 // Function to format the date
-function formatDate(dateString) {
-  const date = new Date(dateString); // Convert the date string to a Date object
+function formatDate(date) {
   const options = { year: "numeric", month: "long", day: "numeric" };
-  return date.toLocaleDateString("en-US", options); // Format the date
+  return new Date(date).toLocaleDateString(undefined, options);
 }
 
-// Function to render events from firestore
-async function renderEvents() {
+// Function to render events for the current user
+async function renderEvents(user) {
   try {
-    const querySnapshot = await getDocs(collection(db, "events"));
+    const eventsRef = collection(db, "events");
+    const q = query(eventsRef, where("userId", "==", user.uid));
+
+    const querySnapshot = await getDocs(q);
+
     eventsList.innerHTML = ""; // Clear the list first
 
     querySnapshot.forEach((eventDoc) => {
-      const eventData = eventDoc.data(); // Get the event data
+      const eventData = eventDoc.data();
 
       const eventItem = document.createElement("li");
       eventItem.classList.add("event-time");
-      eventItem.setAttribute("role", "listitem");
 
-      // Event Header with the date
       const eventHeader = document.createElement("div");
       eventHeader.classList.add("event-header");
       eventHeader.textContent = `${formatDate(eventData.date)}`;
 
-      // Event Details
       const eventDetails = document.createElement("div");
       eventDetails.classList.add("event-details");
 
@@ -108,15 +137,12 @@ async function renderEvents() {
 
       eventDetails.appendChild(eventTitleTime);
 
-      // Container div for the buttons
       const buttonContainer = document.createElement("div");
       buttonContainer.classList.add("button-container");
 
-      // Create delete button for each event
       const deleteBtn = document.createElement("button");
       deleteBtn.classList.add("delete-btn");
       deleteBtn.textContent = "Delete";
-      deleteBtn.setAttribute("aria-label", `Delete ${eventData.title}`);
       deleteBtn.addEventListener("click", async () => {
         try {
           await deleteDoc(doc(db, "events", eventDoc.id));
@@ -126,13 +152,10 @@ async function renderEvents() {
         }
       });
 
-      // Create edit button for each event
       const editBtn = document.createElement("button");
       editBtn.classList.add("edit-btn");
       editBtn.textContent = "Edit";
-      editBtn.setAttribute("aria-label", `Edit ${eventData.title}`);
       editBtn.addEventListener("click", () => {
-        // Open the modal with the current event details
         currentEditingEventId = eventDoc.id;
         modalTitle.value = eventData.title;
         modalDate.value = eventData.date;
@@ -141,11 +164,9 @@ async function renderEvents() {
         openModal();
       });
 
-      // Append buttons to the container
       buttonContainer.appendChild(editBtn);
       buttonContainer.appendChild(deleteBtn);
 
-      // Append everything to the event item
       eventItem.appendChild(eventHeader);
       eventItem.appendChild(eventDetails);
       eventItem.appendChild(buttonContainer);
@@ -156,10 +177,13 @@ async function renderEvents() {
   }
 }
 
-// Function to render the calendar again if it's visible
-async function renderCalendarView() {
+// Function to render events for the calendar view
+async function renderCalendarView(user) {
   try {
-    const querySnapshot = await getDocs(collection(db, "events"));
+    const eventsRef = collection(db, "events");
+    const q = query(eventsRef, where("userId", "==", user.uid));
+
+    const querySnapshot = await getDocs(q);
     const events = [];
 
     querySnapshot.forEach((eventDoc) => {
@@ -178,44 +202,33 @@ async function renderCalendarView() {
       return;
     }
 
-    // Only render the calendar if it's visible
-    if (calendarContainer.style.display === "block") {
-      // Destroy the old calendar if it exists
-      if (calendar) {
-        calendar.destroy();
-      }
-
-      // Initialize the new calendar instance
-      calendar = new FullCalendar.Calendar(calendarEl, {
-        events: events,
-        headerToolbar: {
-          left: "prev,next today",
-          center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay",
-        },
-        editable: true,
-        droppable: true,
-        eventClick: function (info) {
-          modalTitle.value = info.event.title;
-          modalDate.value = info.event.start.toLocaleDateString("en-CA");
-          modalTime.value = info.event.start.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-
-          currentEditingEventId = info.event.id;
-          editModal.style.display = "block";
-
-          // Focus the first input element in the modal
-          modalTitle.focus();
-
-          // Add event listener to trap tab key
-          document.addEventListener("keydown", trapFocus);
-        },
-      });
-
-      calendar.render();
+    if (calendar) {
+      calendar.destroy();
     }
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      events: events,
+      headerToolbar: {
+        left: "prev,next today",
+        center: "title",
+        right: "dayGridMonth,timeGridWeek,timeGridDay",
+      },
+      editable: true,
+      droppable: true,
+      eventClick: function (info) {
+        modalTitle.value = info.event.title;
+        modalDate.value = info.event.start.toLocaleDateString("en-CA");
+        modalTime.value = info.event.start.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        currentEditingEventId = info.event.id;
+        openModal();
+      },
+    });
+
+    calendar.render();
   } catch (e) {
     console.error("Error fetching events for calendar: ", e);
   }
@@ -266,40 +279,42 @@ function closeModal() {
   if (editEventBtn) editEventBtn.focus();
 }
 
-// Event handler for form submission
-eventForm.addEventListener("submit", async function (e) {
-  e.preventDefault(); // Prevent the default form submission
+// Event handler for modal save button
+saveEditBtn.addEventListener("click", async () => {
+  if (currentEditingEventId) {
+    const updatedTitle = modalTitle.value;
+    const updatedDate = modalDate.value;
+    const updatedTime = modalTime.value;
 
-  const title = eventTitle.value;
-  const date = eventDate.value;
-  const time = eventTime.value;
-  const reminder = parseInt(eventReminder.value) || 0;
-
-  if (title && date && time) {
     try {
-      const docRef = await addDoc(collection(db, "events"), {
-        title,
-        date,
-        time,
-        reminder,
+      const eventRef = doc(db, "events", currentEditingEventId);
+      await updateDoc(eventRef, {
+        title: updatedTitle,
+        date: updatedDate,
+        time: updatedTime,
       });
 
-      // Set reminder alert
-      if (reminder > 0) {
-        const eventTimeDate = new Date(`${date}T${time}:00`);
-        const reminderTime = eventTimeDate.getTime() - reminder * 60 * 1000;
-
-        setTimeout(() => {
-          alert(`Reminder: ${title} is starting soon!`);
-        }, reminderTime - Date.now());
-      }
-
-      eventForm.reset();
-      renderEvents();
+      renderEvents(auth.currentUser); // Re-render events after update
       closeModal();
     } catch (e) {
-      console.error("Error adding event: ", e);
+      console.error("Error updating event: ", e);
     }
+  }
+});
+
+// Function to toggle calendar view and list view
+toggleCalendarBtn.addEventListener("click", () => {
+  const isCalendarVisible = calendarContainer.style.display === "block";
+
+  if (isCalendarVisible) {
+    calendarContainer.style.display = "none";
+    eventListContainer.style.display = "block";
+    toggleCalendarBtn.textContent = "View Calendar";
+  } else {
+    calendarContainer.style.display = "block";
+    eventListContainer.style.display = "none";
+    toggleCalendarBtn.textContent = "Close Calendar";
+    renderCalendarView();
   }
 });
 
@@ -319,7 +334,7 @@ saveEditBtn.addEventListener("click", async () => {
       });
 
       closeModal(); // Close the modal after saving
-      renderEvents(); // Re-render events list
+      renderEvents(auth.currentUser);
     } catch (e) {
       console.error("Error updating event: ", e);
     }
@@ -330,6 +345,3 @@ saveEditBtn.addEventListener("click", async () => {
 cancelEditBtn.addEventListener("click", () => {
   closeModal();
 });
-
-// Initialize the events and calendar view
-renderEvents();

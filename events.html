@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Scheduler</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Event Scheduler</h1>
+        <button id="logout-btn" class="logout-btn">Logout</button>
+    </header>
+
+    <section id="event-list">
+        <h2>Upcoming Events</h2>
+        <ul id="events">
+            <!-- Event items will go here -->
+        </ul>
+        <button id="toggle-calendar">View Calendar</button>
+        <div id="calendar" style="display:none;"></div>
+    </section>
+
+    <section id="add-event">
+        <h2>Add New Event</h2>
+        <form id="event-form">
+            <label for="event-title">Title:</label>
+            <input type="text" class="formInput" id="event-title" required>
+
+            <label for="event-date">Date:</label>
+            <input type="date" class="formInput" id="event-date" required>
+
+            <label for="event-time">Time:</label>
+            <input type="time" class="formInput" id="event-time" required>
+
+            <label for="event-reminder">Reminder (minutes before):</label>
+            <input type="number" id="event-reminder" min="1">
+
+            <button type="submit">Add Event</button>
+        </form>
+    </section>
+
+    <!-- Chatbox Button to open/close -->
+    <button id="chatbox-toggle">🗨️</button>
+
+    <!-- Chatbox (initially hidden) -->
+    <div id="chatbox">
+        <div id="chat-history"></div>
+        <input type="text" id="user-input" placeholder="Type your message..." />
+        <button id="send-btn">Send</button>
+    </div>
+
+    <!-- Modal for Editing Event -->
+    <div id="edit-modal" style="display:none;">
+        <h3>Edit Event</h3>
+        <label for="modal-title">Title:</label>
+        <input type="text" id="modal-title" required>
+
+        <label for="modal-date">Date:</label>
+        <input type="date" id="modal-date" required>
+
+        <label for="modal-time">Time:</label>
+        <input type="time" id="modal-time" required>
+
+        <button id="save-edit-btn">Save</button>
+        <button id="cancel-edit-btn">Cancel</button>
+    </div>
+
+    <script type="module" src="./scripts/script.js"></script>
+    <script type="module" src="scripts/chatbot.js"></script>
+    <script type="module" src="scripts/auth.js"></script>
+
+</body>
+
+</html>
