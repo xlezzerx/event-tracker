@@ -30,7 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const forgotPasswordBtn = document.getElementById("forgot-password");
 
   // Run login-related code only if on index.html
-  if (window.location.pathname === "/index.html") {
+  if (
+    window.location.pathname.endsWith("index.html") ||
+    window.location.pathname === "/"
+  ) {
     if (loginForm) {
       loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
