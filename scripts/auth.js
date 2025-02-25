@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Handle logout functionality, only on events.html
-  if (window.location.pathname === "/events.html" || window.location.pathname.endsWith("/event-tracker/")) {
+  if (window.location.pathname.endsWith("events.html")) {
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
