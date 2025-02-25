@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginForm) {
       loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
+        console.log("Login form submitted");
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
         signInWithEmailAndPassword(auth, email, password)
