@@ -41,7 +41,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = document.getElementById("password").value;
         signInWithEmailAndPassword(auth, email, password)
           .then(() => {
-            window.location.href = `${window.location.origin}/events.html`;
+            console.log("Redirecting to:", window.location.href);
+
+            window.location.href = "/event-tracker/events.html";
           })
           .catch((error) => alert(error.message));
       });
