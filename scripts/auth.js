@@ -23,6 +23,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+console.log("Firebase initialized:", app);
+
 document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const biometricBtn = document.getElementById("biometric-login");
@@ -43,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .then(() => {
             console.log("Redirecting to:", window.location.href);
 
-            window.location.href = "/event-tracker/events.html";
+            window.location.href = "events.html";
           })
           .catch((error) => alert(error.message));
       });
@@ -106,6 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle user authentication state
   onAuthStateChanged(auth, (user) => {
     if (!user && window.location.pathname.includes("events.html")) {
+      console.log("Auth state changed:", user);
+
       window.location.href = "index.html";
     }
   });
