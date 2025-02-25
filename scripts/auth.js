@@ -161,6 +161,8 @@ const auth = getAuth(app);
 console.log("Firebase initialized:", app);
 console.log("Auth initialized:", auth);
 
+console.log("Current pathname:", window.location.pathname);
+
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded triggered");
 
@@ -175,9 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.pathname === "/"
   ) {
     console.log("Inside index.html logic");
-
-    const loginForm = document.getElementById("login-form");
-
 
     if (loginForm) {
       loginForm.addEventListener("submit", (e) => {
