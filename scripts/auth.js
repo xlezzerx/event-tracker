@@ -174,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if we're on the login page (index.html)
   if (
     window.location.pathname.endsWith("index.html") ||
+    window.location.pathname.endsWith("/event-tracker/") ||
     window.location.pathname === "/"
   ) {
     console.log("Inside index.html logic");
