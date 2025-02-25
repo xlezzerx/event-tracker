@@ -159,47 +159,65 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 console.log("Firebase initialized:", app);
+console.log("Auth initialized:", auth);
 
-window.onload = () => {
-  console.log("window Loaded triggered");
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOMContentLoaded triggered");
+
   const loginForm = document.getElementById("login-form");
   const biometricBtn = document.getElementById("biometric-login");
   const registerBtn = document.getElementById("register");
   const forgotPasswordBtn = document.getElementById("forgot-password");
 
-  // Run login-related code only if on index.html
+  // Check if we're on the login page (index.html)
   if (
     window.location.pathname.endsWith("index.html") ||
     window.location.pathname === "/"
   ) {
+    console.log("Inside index.html logic");
+
     if (loginForm) {
+      console.log("Login form found");
       loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
         console.log("Login form submitted");
+
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
+
         signInWithEmailAndPassword(auth, email, password)
           .then(() => {
-            console.log("Redirecting to:", window.location.href);
-
+            console.log("Login successful, redirecting to events.html");
             window.location.href = "events.html";
           })
-          .catch((error) => alert(error.message));
+          .catch((error) => {
+            console.error("Login failed:", error);
+            alert(error.message);
+          });
       });
+    } else {
+      console.log("Login form not found");
     }
 
     if (registerBtn) {
+      console.log("Register button found");
       registerBtn.addEventListener("click", () => {
         const email = prompt("Enter email:");
         const password = prompt("Enter password:");
+
         createUserWithEmailAndPassword(auth, email, password)
           .then(() => alert("Registration successful!"))
-          .catch((error) => alert(error.message));
+          .catch((error) => {
+            console.error("Registration failed:", error);
+            alert(error.message);
+          });
       });
     }
 
     if (biometricBtn) {
+      console.log("Biometric login button found");
       biometricBtn.addEventListener("click", async () => {
+        console.log("Biometric login clicked");
         try {
           // Check if WebAuthn is supported in the browser
           if (window.PublicKeyCredential) {
@@ -240,13 +258,30 @@ window.onload = () => {
         }
       });
     }
+
+    if (forgotPasswordBtn) {
+      console.log("Forgot Password button found");
+      forgotPasswordBtn.addEventListener("click", () => {
+        const email = prompt("Enter email to reset password:");
+
+        sendPasswordResetEmail(auth, email)
+          .then(() => {
+            console.log("Password reset email sent");
+            alert("Password reset email sent");
+          })
+          .catch((error) => {
+            console.error("Error sending password reset email:", error);
+            alert(error.message);
+          });
+      });
+    }
   }
 
   // Handle user authentication state
   onAuthStateChanged(auth, (user) => {
+    console.log("Auth state changed:", user);
     if (!user && window.location.pathname.includes("events.html")) {
-      console.log("Auth state changed:", user);
-
+      console.log("User not logged in, redirecting to index.html");
       window.location.href = "index.html";
     }
   });
@@ -256,14 +291,18 @@ window.onload = () => {
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
+        console.log("Logout button clicked");
         signOut(auth)
           .then(() => {
+            console.log("Logout successful, redirecting to index.html");
             window.location.href = "index.html";
           })
           .catch((error) => {
-            console.error("Error logging out: ", error);
+            console.error("Error logging out:", error);
           });
       });
+    } else {
+      console.log("Logout button not found");
     }
   }
-};
+});
