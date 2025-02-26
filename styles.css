@@ -30,7 +30,7 @@ section {
   top: 10px;
   right: 20px;
   padding: 8px 15px;
-  background-color: #e74c3c;
+  background-color: #de301d;
   color: white;
   border: none;
   cursor: pointer;
@@ -38,7 +38,7 @@ section {
 }
 
 .logout-btn:hover {
-  background-color: #c0392b;
+  background-color: #b52818;
 }
 
 /* Form Container */
@@ -70,7 +70,7 @@ form input {
 button {
   margin: 2px;
   padding: 10px 15px;
-  background-color: #4caf50;
+  background-color: #1e511f;
   color: white;
   border: none;
   cursor: pointer;
@@ -78,7 +78,7 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #286e29;
 }
 
 #events {
@@ -109,7 +109,7 @@ button:hover {
 }
 
 .event-header {
-  background-color: #549fe5;
+  background-color: #2983d8;
   font-size: 1.6em;
   color: white;
   padding: 10px;
@@ -141,7 +141,7 @@ button:hover {
 button.delete-btn,
 button.edit-btn {
   padding: 8px 12px;
-  background-color: #e74c3c;
+  background-color: #de301d;
   color: white;
   border: none;
   cursor: pointer;
@@ -150,7 +150,7 @@ button.edit-btn {
 }
 
 button.delete-btn:hover {
-  background-color: #c0392b;
+  background-color: #b52818;
 }
 
 button.edit-btn {
@@ -184,14 +184,14 @@ button.edit-btn:hover {
 #edit-modal button {
   margin: 10px 5px;
   padding: 10px 15px;
-  background-color: #4caf50;
+  background-color: #a334db;
   color: white;
   border: none;
   cursor: pointer;
 }
 
 #edit-modal button:hover {
-  background-color: #45a049;
+  background-color: #711c8b;
 }
 
 .calendar-hidden {
@@ -243,6 +243,18 @@ button.edit-btn:hover {
   padding: 8px;
   border-radius: 5px;
   max-width: 100%;
+}
+
+/* Hidden label for screen readers on the chatbot input*/
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 /* Style for user message */

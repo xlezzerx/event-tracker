@@ -83,26 +83,14 @@ button:disabled {
 #biometric-login,
 #register,
 #forgot-password {
-  background-color: #4caf50;
-  width: 100%;
+  background-color: #1e511f;
+  width: 80%;
 }
 
 #biometric-login:hover,
 #register:hover,
 #forgot-password:hover {
-  background-color: #45a049;
-}
-
-#biometric-login {
-  margin-top: 10px;
-}
-
-#register {
-  margin-top: 10px;
-}
-
-#forgot-password {
-  margin-top: 10px;
+  background-color: #286e29;
 }
 
 /* Responsive Design */
