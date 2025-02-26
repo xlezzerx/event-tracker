@@ -316,6 +316,10 @@ toggleCalendarBtn.addEventListener("click", () => {
     toggleCalendarBtn.textContent = "Close Calendar";
     renderCalendarView();
   }
+  // Render the calender again to fix the styling issue on first render
+  setTimeout(() => {
+    calendar.render();
+  }, 1);
 });
 
 // Event handler for modal save button
