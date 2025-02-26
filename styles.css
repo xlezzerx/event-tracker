@@ -211,14 +211,14 @@ button.edit-btn:hover {
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  display: flex; /* Change from 'none' to 'flex' */
+  display: flex;
   flex-direction: column;
   font-family: Arial, sans-serif;
   overflow: hidden;
   z-index: 9999;
-  transform: scale(0); /* Keeps it hidden initially */
+  transform: scale(0);
   transition: transform 0.3s ease-out;
-  visibility: hidden; /* Hide initially instead of using display: none */
+  visibility: hidden;
   opacity: 0;
 }
 
