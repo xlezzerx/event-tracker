@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const biometricBtn = document.getElementById("biometric-login");
   const registerBtn = document.getElementById("register");
   const forgotPasswordBtn = document.getElementById("forgot-password");
+  const logoutBtn = document.getElementById("logout-btn");
 
   // Check if we're on the login page (index.html)
   if (
@@ -121,16 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   }
-
-  // Handle user authentication state
-  // onAuthStateChanged(auth, (user) => {
-  //   console.log("Auth state changed:", user);
-  //   if (user) {
-  //     console.log("User is logged in:", user.email);
-  //   } else {
-  //     console.log("No user is logged in.");
-  //   }
-  // });
 
   // Handle logout functionality, only on events.html
   if (window.location.pathname.endsWith("events.html")) {
