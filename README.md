@@ -45,6 +45,10 @@ If you want to run the app with your own Firebase project, update the firebaseCo
 - FullCalendar.js for event visualization
 - AI integration using Google's Gemini API
 
+### Gemini AI
+
+Try typing "add event:" to the bot and see what happens!
+
 ## Live Demo
 
 Access the live app on GitHub Pages: https://xlezzerx.github.io/event-tracker/
