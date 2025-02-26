@@ -37,7 +37,6 @@
 //   const sendBtn = document.getElementById("send-btn");
 //   const chatHistory = document.getElementById("chat-history");
 
-//   // Fetch API key once the document is loaded
 //   fetchApiKey();
 
 //   // Toggle chatbox open/close
@@ -55,7 +54,7 @@
 //         if (inputText.trim()) {
 //           appendMessage(inputText, "user-message");
 //           userInput.value = ""; // Clear input after sending
-//           callGeminiAPI(inputText);
+//           processCommand(inputText);
 //         }
 //       }
 //     });
@@ -68,7 +67,7 @@
 //       if (inputText.trim()) {
 //         appendMessage(inputText, "user-message");
 //         userInput.value = "";
-//         callGeminiAPI(inputText);
+//         processCommand(inputText);
 //       }
 //     });
 //   }
@@ -90,12 +89,110 @@
 
 //       if (docSnap.exists()) {
 //         GEMINI_API_KEY = docSnap.data().key;
-//         console.log("✅ API Key Loaded:", GEMINI_API_KEY);
 //       } else {
-//         console.error("❌ No API key found in Firestore!");
+//         console.error("No API key found in Firestore!");
 //       }
 //     } catch (error) {
-//       console.error("❌ Error fetching API key:", error);
+//       console.error("Error fetching API key:", error);
+//     }
+//   }
+
+//   // Function to process user command
+//   async function processCommand(userInput) {
+//     // Check if the input is asking how to add an event
+//     if (userInput.toLowerCase().includes("how do i add an event")) {
+//       appendMessage(
+//         "You can add an event using the format: `add event: <event>, <month/day>, <time 00:00 am/pm>`.",
+//         "bot-message"
+//       );
+//       return;
+//     }
+
+//     // Check if the input is "add event:"
+//     if (userInput.toLowerCase().startsWith("add event:")) {
+//       const details = userInput.replace("add event:", "").trim();
+//       const { title, date, time } = parseEventDetails(details);
+
+//       // If parsing failed, display an error message
+//       if (!title || !date || !time) {
+//         appendMessage(
+//           "❌ Invalid format! Please follow the format: `add event: <event>, <month/day>, <time 00:00 am/pm>`.",
+//           "bot-message"
+//         );
+//         return;
+//       }
+
+//       await addEvent(title, date, time);
+//     }
+
+//     // Otherwise, process other chatbot responses
+//     else {
+//       callGeminiAPI(userInput);
+//     }
+//   }
+
+//   // Function to parse event details
+//   function parseEventDetails(details) {
+//     const parts = details.trim().split(",");
+//     if (parts.length !== 3) return {}; // Ensure there are exactly three parts: title, date, and time
+
+//     const title = parts[0].trim();
+//     const date = parts[1].trim();
+//     const time = parts[2].trim();
+
+//     return { title, date, time };
+//   }
+
+//   // Function to format date and time
+//   function formatDateAndTime(date, time) {
+//     // Parse date
+//     const dateParts = date.split(" ");
+//     const month =
+//       new Date(Date.parse(dateParts[0] + " 1, 2025")).getMonth() + 1; // Get month as number
+//     const day = parseInt(dateParts[1]);
+//     const year = new Date().getFullYear();
+
+//     // Format date as YYYY-MM-DD
+//     const formattedDate = `${year}-${String(month).padStart(2, "0")}-${String(
+//       day
+//     ).padStart(2, "0")}`;
+
+//     // Convert time to 24-hour format
+//     const timeParts = time.split(/[: ]/); // Split by colon and space
+//     let hours = parseInt(timeParts[0]);
+//     const minutes = timeParts[1];
+//     const ampm = timeParts[2].toUpperCase();
+
+//     if (ampm === "PM" && hours !== 12) hours += 12; // Convert PM time to 24-hour format
+//     if (ampm === "AM" && hours === 12) hours = 0; // Convert 12 AM to 00:xx
+
+//     const formattedTime = `${String(hours).padStart(2, "0")}:${minutes}`;
+
+//     return { formattedDate, formattedTime };
+//   }
+
+//   // Function to add event to Firestore
+//   async function addEvent(title, date, time) {
+//     if (!title || !date || !time) {
+//       appendMessage(
+//         "❌ Missing title, date, or time. Please follow the format: `add event: <title>, <date>, <time>`.",
+//         "bot-message"
+//       );
+//       return;
+//     }
+
+//     const { formattedDate, formattedTime } = formatDateAndTime(date, time);
+
+//     try {
+//       await addDoc(collection(db, "events"), {
+//         title,
+//         date: formattedDate,
+//         time: formattedTime,
+//       });
+//       appendMessage("✅ Event added successfully!", "bot-message");
+//     } catch (e) {
+//       console.error("Error adding event:", e);
+//       appendMessage("❌ Error adding event.", "bot-message");
 //     }
 //   }
 
@@ -153,8 +250,6 @@
 //   }
 // });
 
-// ============== Above is original working chatbot without event adding ========== //
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import {
   getFirestore,
@@ -168,6 +263,10 @@ import {
   where,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -183,6 +282,17 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
+let currentUserId = null;
+
+// Listen for auth state changes
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUserId = user.uid;
+  } else {
+    currentUserId = null;
+  }
+});
 
 let GEMINI_API_KEY = "";
 
@@ -246,7 +356,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (docSnap.exists()) {
         GEMINI_API_KEY = docSnap.data().key;
-        console.log("✅ API Key Loaded");
       } else {
         console.error("No API key found in Firestore!");
       }
@@ -333,7 +442,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function addEvent(title, date, time) {
     if (!title || !date || !time) {
       appendMessage(
-        "❌ Missing title, date, or time. Please follow the format: `add event: <title>, <date>, <time>`.",
+        "❌ Missing title, date, or time. Please use: `add event: <title>, <date>, <time>`.",
         "bot-message"
       );
       return;
@@ -342,15 +451,39 @@ document.addEventListener("DOMContentLoaded", function () {
     const { formattedDate, formattedTime } = formatDateAndTime(date, time);
 
     try {
-      await addDoc(collection(db, "events"), {
-        title,
-        date: formattedDate,
-        time: formattedTime,
-      });
-      appendMessage("✅ Event added successfully!", "bot-message");
+      const eventsRef = collection(db, "events");
+      const q = query(
+        eventsRef,
+        where("userId", "==", currentUserId),
+        where("title", "==", title)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // If the event already exists for this user, update it
+        querySnapshot.forEach(async (eventDoc) => {
+          const eventRef = doc(db, "events", eventDoc.id);
+          await updateDoc(eventRef, {
+            date: formattedDate,
+            time: formattedTime,
+          });
+        });
+
+        appendMessage("✅ Event updated successfully!", "bot-message");
+      } else {
+        // Otherwise, add a new event for this user
+        await addDoc(eventsRef, {
+          userId: currentUserId, // Associate event with user
+          title,
+          date: formattedDate,
+          time: formattedTime,
+        });
+
+        appendMessage("✅ Event added successfully!", "bot-message");
+      }
     } catch (e) {
-      console.error("Error adding event:", e);
-      appendMessage("❌ Error adding event.", "bot-message");
+      console.error("Error adding/updating event:", e);
+      appendMessage("❌ Error saving event.", "bot-message");
     }
   }
 
