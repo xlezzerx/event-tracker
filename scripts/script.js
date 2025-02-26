@@ -54,7 +54,6 @@ let calendar;
 auth.onAuthStateChanged((user) => {
   if (user) {
     // User is signed in, you can now render events
-    console.log("User logged in:", user.uid);
     renderEvents(user);
     renderCalendarView(user);
   } else {
