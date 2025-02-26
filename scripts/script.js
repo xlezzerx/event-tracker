@@ -102,9 +102,11 @@ eventForm.addEventListener("submit", async function (e) {
 });
 
 // Function to format the date
-function formatDate(date) {
+function formatDate(dateString) {
+  const [year, month, day] = dateString.split("-");
+  const localDate = new Date(year, month - 1, day);
   const options = { year: "numeric", month: "long", day: "numeric" };
-  return new Date(date).toLocaleDateString(undefined, options);
+  return localDate.toLocaleDateString(undefined, options);
 }
 
 // Function to render events for the current user
@@ -188,6 +190,8 @@ async function renderCalendarView(user) {
     querySnapshot.forEach((eventDoc) => {
       const eventData = eventDoc.data();
       const startDateTime = new Date(`${eventData.date}T${eventData.time}`);
+
+      console.log("Parsed startDateTime:", startDateTime);
       events.push({
         id: eventDoc.id,
         title: eventData.title,
